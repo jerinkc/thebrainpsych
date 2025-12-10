@@ -1,10 +1,10 @@
 class TextToSpeechController < ApplicationController
   def get_voice
-    request = TextToSpeechRequest.new(text_convert_request_params)
+    request = TextToSpeechRequest.new(request_params)
 
     if request.save
-      # TODO: initiate job
-      render json: request
+      TextToSpeechService.schedule(request)
+      render json: { id: request.id, status: request.status }
     else
       render json: { errors: request.errors }, status: :unprocessable_entity
     end
@@ -13,9 +13,16 @@ class TextToSpeechController < ApplicationController
   def status
     request = TextToSpeechRequest.find(params[:id])
 
-    render json: {
-      data: { queue_position: request.id - TextToSpeechService.current }
+    response_data = {
+      id: request.id,
+      status: request.status
     }
+
+    if request.complete?
+      response_data[:url] = request.audio.url
+    end
+
+    render json: response_data
   end
 
   private
