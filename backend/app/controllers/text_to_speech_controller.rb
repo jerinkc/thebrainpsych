@@ -11,11 +11,12 @@ class TextToSpeechController < ApplicationController
   end
 
   def status
-    request = TextToSpeechRequest.find(params[:id])
+    request = TextToSpeechRequest.find(params[:text_to_speech_id])
 
     response_data = {
       id: request.id,
       status: request.status
+      # queue_position: request.id - TextToSpeechService.last_executed_request_id #TODO: get queue position
     }
 
     if request.complete?

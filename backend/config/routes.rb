@@ -3,5 +3,7 @@ Rails.application.routes.draw do
     collection do
       post :get_voice
     end
+
+    get :status
   end
 end
