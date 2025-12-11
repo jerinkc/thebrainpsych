@@ -1,6 +1,6 @@
 # Getting Started with Create React App
 
-[![Demo](https://youtu.be/R_r9rWxmUBs)](https://youtu.be/R_r9rWxmUBs)
+Watch Demo video [here](https://youtu.be/R_r9rWxmUBs)
 
 # Requirements
 
