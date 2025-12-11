@@ -3,6 +3,7 @@ require 'net/http'
 class ElevenLabsClient
   DEFAULT_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"
   BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech"
+  API_KEY = Rails.application.credentials.elevenlabs_api_key
 
   class ApiError < StandardError; end
 
@@ -35,7 +36,7 @@ class ElevenLabsClient
 
   def build_request
     Net::HTTP::Post.new(url).tap do |req|
-      req["xi-api-key"] = Rails.application.credentials.elevenlabs_api_key
+      req["xi-api-key"] = API_KEY
       req["Content-Type"] = "application/json"
       req.body = { text: @text }.to_json
     end

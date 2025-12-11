@@ -1,7 +1,7 @@
 class TextToSpeechJob < ApplicationJob
   queue_as :default
 
-  retry_on ElevenLabsClient::ApiError, wait: :exponentially_longer, attempts: 3
+  retry_on ElevenLabsClient::ApiError, wait: :polynomially_longer, attempts: 3
 
   def perform(request)
     TextToSpeechService.new(request)
