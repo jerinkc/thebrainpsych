@@ -43,14 +43,18 @@ function App() {
   }
 
   const handleApiError = (error) => {
-    const { status, message } = error
-    setApiStatus({ status, message });
+    const { status, message, errorData } = error
+    setApiStatus({ status, message, errorMessage: errorData.errors });
     setIsLoading(false)
   }
 
   const handleTextInput = (e) => {
     setText(e.target.value)
-    if(apiStatus.status === 'complete') setApiStatus({ status: 'new' })
+
+    if(apiStatus.status === 'complete'){
+      setApiStatus({ status: 'new' })
+      setAudioUrl(null)
+    }
   }
 
   return (
@@ -64,13 +68,17 @@ function App() {
           disabled={isLoading}
         />
         {
-          apiStatus.status === 'complete' &&
-              <audio controls>
-                <source
-                  src={ audioUrl }
-                  type="audio/mpeg"/>
-                Your browser does not support the audio element.
-              </audio>
+          apiStatus.errorMessage &&
+            <p className='error-message'>{ apiStatus.errorMessage }</p>
+        }
+        {
+          (apiStatus.status === 'complete' && audioUrl) &&
+            <audio controls>
+              <source
+                src={ audioUrl }
+                type="audio/mpeg"/>
+              Your browser does not support the audio element.
+            </audio>
         }
         {
           apiStatus.status !== 'complete' &&

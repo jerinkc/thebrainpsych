@@ -6,7 +6,7 @@ class TextToSpeechController < ApplicationController
       TextToSpeechService.schedule(request)
       render json: { id: request.id, status: request.status }
     else
-      render json: { errors: request.errors }, status: :unprocessable_content
+      render json: { errors: request.errors.full_messages.first }, status: :unprocessable_content
     end
   end
 
