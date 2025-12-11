@@ -7,15 +7,20 @@ function App() {
   const [apiStatus, setApiStatus] = useState({ status: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
+  const statusMessages = {
+    'pending': 'In Queue...',
+    'converting': 'Converting...',
+    'uploading': 'Uploading...'
+  };
 
   const handleSubmit = () => {
     setIsLoading(true);
-    setApiStatus({ status: 'pending', message: 'Sending...' });
+    setApiStatus({ status: 'pending' });
     createRequest({
       text,
       onError: handleApiError,
       onSuccess: (data) => {
-        setApiStatus({ status: data.status, message: 'pending' })
+        setApiStatus({ status: data.status })
         setTimeout(() => fetchStatus(data.id), 2000)
       }})
   };
@@ -27,11 +32,11 @@ function App() {
         if( data.status === 'complete' ){
           setIsLoading(false)
           setText('')
-          setApiStatus({ status: 'complete', message: '' })
           setAudioUrl(data.url)
-          return null;
         }
-        setTimeout(() => fetchStatus(data.id), 1000)
+
+        setApiStatus({ status: data.status })
+        if( data.status !== 'complete' ) setTimeout(() => fetchStatus(data.id), 1000)
       },
       onError: handleApiError
     })
@@ -40,11 +45,12 @@ function App() {
   const handleApiError = (error) => {
     const { status, message } = error
     setApiStatus({ status, message });
+    setIsLoading(false)
   }
 
   const handleTextInput = (e) => {
     setText(e.target.value)
-    if(apiStatus.status === 'complete') setApiStatus({ status: 'new', message: '' })
+    if(apiStatus.status === 'complete') setApiStatus({ status: 'new' })
   }
 
   return (
@@ -71,7 +77,7 @@ function App() {
             <button onClick={ handleSubmit }
               disabled={ isLoading }
             >
-              { isLoading ? apiStatus.message : 'Submit' }
+              { isLoading ? (apiStatus.message || statusMessages[apiStatus.status]) : 'Submit' }
             </button>
         }
       </div>

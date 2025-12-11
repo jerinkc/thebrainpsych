@@ -6,8 +6,10 @@ class TextToSpeechService
   end
 
   def convert_to_audio!
+    @request.converting!
     response = ElevenLabsClient.new(@request.text).request
 
+    @request.uploading!
     @request.audio.attach(
       io: StringIO.new(response.body),
       filename: "voice_#{ @request.id }.mpeg",
@@ -16,13 +18,6 @@ class TextToSpeechService
   end
 
   def self.schedule(text_to_speech_request)
-    TextToSpeechJob.perform_later(text_to_speech_request)
+    TextToSpeechJob.perform_now(text_to_speech_request)
   end
-
-  # def self.last_executed_request_id(current_execute_request_id = nil)
-  #   return Rails.cache.read(LAST_EXECUTED_TEXT_TO_SPEECH_KEY) if !current_execute_request_id
-
-  #   Rails.cache.write(LAST_EXECUTED_TEXT_TO_SPEECH_KEY, current_execute_request_id)
-  #   current_execute_request_id
-  # end
 end

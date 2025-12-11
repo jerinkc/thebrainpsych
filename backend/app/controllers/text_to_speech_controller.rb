@@ -6,7 +6,7 @@ class TextToSpeechController < ApplicationController
       TextToSpeechService.schedule(request)
       render json: { id: request.id, status: request.status }
     else
-      render json: { errors: request.errors }, status: :unprocessable_entity
+      render json: { errors: request.errors }, status: :unprocessable_content
     end
   end
 
@@ -16,7 +16,6 @@ class TextToSpeechController < ApplicationController
     response_data = {
       id: request.id,
       status: request.status
-      # queue_position: request.id - TextToSpeechService.last_executed_request_id #TODO: get queue position
     }
 
     if request.complete?
