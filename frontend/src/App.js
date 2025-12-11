@@ -1,60 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import { createRequest, getStatus } from './api/text-to-speech-api';
 
 function App() {
   const [text, setText] = useState('');
-  const [status, setStatus] = useState('');
+  const [apiStatus, setApiStatus] = useState({ status: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [audioUrl, setAudioUrl] = useState(null);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     setIsLoading(true);
-    setStatus('Sending...');
-
-    try {
-      const response = await fetch('http://localhost:3000/text_to_speech/get_voice', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify( { voice_request: { text } }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setTimeout(fetchStatus, 1000)
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setStatus(`Error: ${errorData.message || response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Error submitting text:', error);
-      setStatus('Failed to connect to the server.');
-    }
+    setApiStatus({ status: 'pending', message: 'Sending...' });
+    createRequest({
+      text,
+      onError: handleApiError,
+      onSuccess: (data) => {
+        setApiStatus({ status: data.status, message: 'pending' })
+        setTimeout(() => fetchStatus(data.id), 2000)
+      }})
   };
 
-  async function fetchStatus() {
-    try {
-      const response = await fetch('http://localhost:3000/text_to_speech/status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify( { voice_request: { text } }),
-      });
+  const fetchStatus = (id) => {
+    getStatus({
+      requestId: id,
+      onSuccess: (data) => {
+        if( data.status === 'complete' ){
+          setIsLoading(false)
+          setText('')
+          setApiStatus({ status: 'complete', message: '' })
+          setAudioUrl(data.url)
+          return null;
+        }
+        setTimeout(() => fetchStatus(data.id), 1000)
+      },
+      onError: handleApiError
+    })
+  }
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setTimeout(fetchStatus, 1000)
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setStatus(`Error: ${errorData.message || response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Error submitting text:', error);
-      setStatus('Failed to connect to the server.');
-    }
+  const handleApiError = (error) => {
+    const { status, message } = error
+    setApiStatus({ status, message });
+  }
+
+  const handleTextInput = (e) => {
+    setText(e.target.value)
+    if(apiStatus.status === 'complete') setApiStatus({ status: 'new', message: '' })
   }
 
   return (
@@ -64,14 +54,26 @@ function App() {
         <textarea
           placeholder="Enter your text here..."
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={ handleTextInput }
           disabled={isLoading}
         />
-        <button onClick={ handleSubmit }
-          disabled={ isLoading || !text.trim() }
-        >
-          { isLoading ? status : 'Submit' }
-        </button>
+        {
+          apiStatus.status === 'complete' &&
+              <audio controls>
+                <source
+                  src={ audioUrl }
+                  type="audio/mpeg"/>
+                Your browser does not support the audio element.
+              </audio>
+        }
+        {
+          apiStatus.status !== 'complete' &&
+            <button onClick={ handleSubmit }
+              disabled={ isLoading }
+            >
+              { isLoading ? apiStatus.message : 'Submit' }
+            </button>
+        }
       </div>
     </div>
   );
