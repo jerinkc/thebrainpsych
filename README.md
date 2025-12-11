@@ -37,6 +37,8 @@ Use command `VISUAL="code --wait" bin/rails credentials:edit` to edit rails cred
 
 ```
 
+## Data Models & Background Jobs
+
 ## frontend setup
 The following commands will install dependencies of react app
 
@@ -51,3 +53,20 @@ Run `rails s` from /backend directory, which runs rails server on port 3000
 Run `npm start` from /frontend directory, which runs react app on port 3001.
 
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+
+## Data Models
+  - **TextToSpeechRequest**: Model to store text-to-speech requests
+    - **Attributes**:
+      - `text`: The text content to be converted.
+      - `status`: Tracking the process state (`pending`, `complete`).
+    - **Attachments**:
+      - `audio`: The generated audio file (via Active Storage).
+
+
+  ## Background Jobs
+  - **TextToSpeechJob**: Handles the asynchronous processing of text-to-speech conversion.
+    - It utilizes `TextToSpeechService` to interact with the ElevenLabs API.
+    - Upon success, it will upload the audio to AWS S3 and attach it to the `TextToSpeechRequest` model.
+
+The frontend will poll the `TextToSpeechRequest` model for the status of the conversion. Once the conversion is complete, the frontend will get the audio file from AWS S3 and play it.
