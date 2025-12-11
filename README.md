@@ -1,5 +1,3 @@
-# Getting Started with Create React App
-
 Watch Demo video [here](https://youtu.be/R_r9rWxmUBs)
 
 # Requirements
