@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 import { createRequest, getStatus } from './api/text-to-speech-api';
 

@@ -1,8 +1,8 @@
-const PATH = `http://localhost:3000//text_to_speech`
+const SERVER_BASE_URL = `http://localhost:3000//text_to_speech`
 
 export async function getStatus({ requestId, onSuccess, onError }){
   try {
-    const response = await fetch(`${PATH}/${requestId}/status`);
+    const response = await fetch(`${SERVER_BASE_URL}/${requestId}/status`);
 
     if (response.ok) {
       const data = await response.json();
@@ -19,7 +19,7 @@ export async function getStatus({ requestId, onSuccess, onError }){
 
 export async function createRequest({ text, onSuccess, onError }){
   try {
-    const response = await fetch(`${PATH}/get_voice`, {
+    const response = await fetch(`${SERVER_BASE_URL}/get_voice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
